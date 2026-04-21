@@ -14,11 +14,13 @@ struct Point {
 int dr[] = {-1, 1, 0, 0};
 int dc[] = {0, 0, -1, 1};
 
+/**
+ * Performs a Breadth-First Search to find the shortest distance from (start_r, start_c)
+ * to all other reachable cells in the grid, avoiding construction sites (1).
+ */
 void bfs(int n, int m, const vector<vector<int>>& grid, int start_r, int start_c, vector<vector<int>>& dist) {
     for (int i = 0; i < m; ++i) {
-        for (int j = 0; j < n; ++j) {
-            dist[i][j] = INF;
-        }
+        fill(dist[i].begin(), dist[i].end(), INF);
     }
     if (start_r == -1 || start_c == -1) return;
 
@@ -70,16 +72,19 @@ int main() {
         }
     }
 
-    vector<vector<int>> dist2(m, vector<int>(n));
-    vector<vector<int>> dist3(m, vector<int>(n));
+    // dist_from_start[i][j] stores the shortest distance from the starting position (2) to (i, j)
+    vector<vector<int>> dist_from_start(m, vector<int>(n));
+    // dist_from_home[i][j] stores the shortest distance from the home (3) to (i, j)
+    vector<vector<int>> dist_from_home(m, vector<int>(n));
 
-    bfs(n, m, grid, start_r, start_c, dist2);
-    bfs(n, m, grid, end_r, end_c, dist3);
+    bfs(n, m, grid, start_r, start_c, dist_from_start);
+    bfs(n, m, grid, end_r, end_c, dist_from_home);
 
     int min_dist = INF;
+    // Find an umbrella shop (4) that minimizes the total distance: start -> shop -> home
     for (const auto& shop : shops) {
-        if (dist2[shop.r][shop.c] != INF && dist3[shop.r][shop.c] != INF) {
-            min_dist = min(min_dist, dist2[shop.r][shop.c] + dist3[shop.r][shop.c]);
+        if (dist_from_start[shop.r][shop.c] != INF && dist_from_home[shop.r][shop.c] != INF) {
+            min_dist = min(min_dist, dist_from_start[shop.r][shop.c] + dist_from_home[shop.r][shop.c]);
         }
     }
 
